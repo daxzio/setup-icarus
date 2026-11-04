@@ -1,0 +1,39 @@
+name: setup-icarus
+description: Install a prebuilt Icarus Verilog
+branding:
+  color: green
+  icon: download
+inputs:
+  version:
+    description: "Icarus release to install (for example v13_0). Defaults to the latest package release."
+    required: false
+    default: latest
+runs:
+  using: composite
+  steps:
+    - name: Install Icarus
+      shell: bash
+      run: |
+        set -euo pipefail
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        if [ "${ID:-}" != "ubuntu" ] || [ "${VERSION_ID:-}" != "24.04" ]; then
+          echo "setup-icarus supports ubuntu-24.04 only (this runner is ${ID:-unknown} ${VERSION_ID:-unknown})" >&2
+          exit 1
+        fi
+        version="${{ inputs.version }}"
+        asset="icarus-ubuntu-24.04.tar.gz"
+        if [ "$version" = "latest" ]; then
+          url="https://github.com/daxzio/icarus-package/releases/latest/download/${asset}"
+        else
+          url="https://github.com/daxzio/icarus-package/releases/download/${version}/${asset}"
+        fi
+        dest="${RUNNER_TEMP}/icarus"
+        rm -rf "$dest"
+        mkdir -p "$dest"
+        curl -fsSL "$url" | tar -xz -C "$dest"
+        if [ ! -x "$dest/bin/iverilog" ] || [ ! -x "$dest/bin/vvp" ]; then
+          echo "archive from ${url} did not contain bin/iverilog and bin/vvp" >&2
+          exit 1
+        fi
+        echo "$dest/bin" >> "$GITHUB_PATH"

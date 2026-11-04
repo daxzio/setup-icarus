@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Icarus
+        uses: ./
+        with:
+          version: "v13_0"
+
+      - name: Report version
+        run: |
+          iverilog -V
+          vvp -V
+          iverilog -V | grep -F "Icarus Verilog version 13.0"
+
+      - name: Compile and run
+        run: |
+          cat > t.v << 'EOF'
+          module t;
+            initial begin
+              $display("icarus ok");
+              $finish;
+            end
+          endmodule
+          EOF
+          iverilog -o t.vvp t.v
+          vvp t.vvp | grep -F "icarus ok"
