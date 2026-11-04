@@ -16,10 +16,10 @@ jobs:
       - run: iverilog -V
 ```
 
-Pin a release with `version`. Use the upstream tag, including the `v`. The default is the latest package release.
+The default `version` is the latest package release. Right now that is `2026.11.04`, built from the `master` tip on that day. `iverilog -V` reports `14.0 (devel) (2026.11.04-dirty)`. Pin `v13_0` for the stable release.
 
 ```yaml
 - uses: daxzio/setup-icarus@v1
   with:
-    version: "v13_0"
+    version: "2026.11.04"
 ```
