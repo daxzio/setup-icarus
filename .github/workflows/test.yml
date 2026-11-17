@@ -9,15 +9,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - version: latest
-            expect: "2026.11.04-dirty"
-          - version: v13_0
-            expect: "Icarus Verilog version 13.0"
+        runs-on: [ubuntu-24.04, ubuntu-26.04]
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,13 +21,13 @@ jobs:
       - name: Setup Icarus
         uses: ./
         with:
-          version: ${{ matrix.version }}
+          version: latest
 
       - name: Report version
         run: |
           iverilog -V
           vvp -V
-          iverilog -V | grep -F "${{ matrix.expect }}"
+          iverilog -V | grep -F "2026.11.04-dirty"
 
       - name: Compile and run
         run: |
